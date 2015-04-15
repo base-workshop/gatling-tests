@@ -7,7 +7,7 @@ import io.gatling.http.Predef._
 object Common {
 
   val httpConf = http
-    .proxy(Proxy("127.0.0.1", 8888).httpsPort(8888))
+    // .proxy(Proxy("127.0.0.1", 8888).httpsPort(8888))
     .baseURL("https://workshop.uxguards.com/workshop/api")
     .disableCaching
 
