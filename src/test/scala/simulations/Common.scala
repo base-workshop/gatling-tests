@@ -8,7 +8,7 @@ object Common {
 
   val httpConf = http
     // .proxy(Proxy("127.0.0.1", 8888).httpsPort(8888))
-    .baseURL("https://workshop.uxguards.com/workshop/api")
+    .baseURL("https://workshop.uxguards.com/whipping-boy/api")
     .disableCaching
 
   val commonHeaders = Map(
