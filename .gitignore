@@ -1,0 +1,8 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+target
+.DS_Store
