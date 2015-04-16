@@ -27,7 +27,7 @@ class WorkshopSimulation extends Simulation {
 
   def artist(): String = {
     """{"name": "Krizoooo",
-        "label_Id": "${labelID}"}"""
+        "label_id": ${labelId}}"""
   }
 
   val createLabel = exec(
@@ -37,12 +37,12 @@ class WorkshopSimulation extends Simulation {
       .asJSON
       .check(status.is(201))
       .check(jsonPath("$.id")
-        .saveAs("labelID"))
+        .saveAs("labelId"))
   )
 
   val getLabel = exec(
     http("Get label")
-      .get("/labels/${labelID}")
+      .get("/labels/${labelId}")
       .headers(commonHeaders)
       .check(status.is(200))
     )
