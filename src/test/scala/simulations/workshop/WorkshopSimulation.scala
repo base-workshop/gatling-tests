@@ -18,16 +18,39 @@ class WorkshopSimulation extends Simulation {
     HttpHeaderNames.Accept -> HttpHeaderValues.ApplicationJson
   )
 
-  val data = csv("data.csv").circular
+  val data = csv("labels.csv").circular
 
-  def website(): String = {
-    """{"url":"${url}"}"""
+  def label(): String = {
+    """{"country": "${country}",
+        "name":"${name}"}"""
   }
 
-  val createWebsite = exec(
-    http("Create Website")
-      .post("/websites")
-      .body(StringBody(website()))
+  def artist(): String = {
+    """{"name": "Krizoooo",
+        "label_Id": "${labelID}"}"""
+  }
+
+  val createLabel = exec(
+    http("Create Label")
+      .post("/labels")
+      .body(StringBody(label()))
+      .asJSON
+      .check(status.is(201))
+      .check(jsonPath("$.id")
+        .saveAs("labelID"))
+  )
+
+  val getLabel = exec(
+    http("Get label")
+      .get("/labels/${labelID}")
+      .headers(commonHeaders)
+      .check(status.is(200))
+    )
+
+  val createArtist = exec(
+    http("Create Artist")
+      .post("/artists")
+      .body(StringBody(artist()))
       .asJSON
       .check(status.is(201))
   )
@@ -37,8 +60,10 @@ class WorkshopSimulation extends Simulation {
     .forever {
       feed(data)
       .pause(1)
-      .exec(http("discovery").options("/").headers(commonHeaders))
-      .exec(createWebsite)
+      .exec(http("kriz").options("/").headers(commonHeaders))
+      .exec(createLabel)
+      .exec(getLabel)
+      .exec(createArtist)
   }
 
   setUp(
@@ -46,6 +71,6 @@ class WorkshopSimulation extends Simulation {
       rampUsers(1) over (2 seconds)
     )
   ).protocols(httpConf)
-    .maxDuration(testDurationSec() seconds)
+    .maxDuration(15 seconds)
 
 }
