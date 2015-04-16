@@ -81,6 +81,13 @@ class WorkshopSimulation extends Simulation {
       .check(status.is(201))
   )
 
+  val deleteCover = exec(
+    http("Delete cover")
+      .delete("/covers/${cover-id}")
+      .headers(commonHeaders)
+      .check(status.is(200))
+  )
+
   val singleCreateCoverScenario = scenario("Create cover scenario")
     .feed(data)
     .forever {
@@ -110,6 +117,18 @@ class WorkshopSimulation extends Simulation {
       .exec(putCover)
   }
 
+  val singleDeleteCoversScenario = scenario("Delete cover scenario")
+    .feed(data)
+    .forever {
+    feed(data)
+      .pause(1)
+      .exec(createArtist)
+      .exec(createAlbum)
+      .exec(createCover)
+      .exec(deleteCover)
+  }
+
+
   setUp(List(
     singleCreateCoverScenario.inject(
       rampUsers(1) over (2 seconds)
@@ -118,6 +137,9 @@ class WorkshopSimulation extends Simulation {
       rampUsers(1) over (2 seconds)
     ),
     singlePutCoversScenario.inject(
+      rampUsers(1) over (2 seconds)
+    ),
+    singleDeleteCoversScenario.inject(
       rampUsers(1) over (2 seconds)
     )
   )
