@@ -21,7 +21,7 @@ class WorkshopSimulation extends Simulation {
 
   val data = csv("data.csv").circular
 
-  def artistBody(name:String): String = {
+  def artistBody(name: String): String = {
     s"""{"name":"$name"}"""
   }
 
@@ -32,7 +32,6 @@ class WorkshopSimulation extends Simulation {
   def coverBody(): String = {
     """{"url":"http://LOL", "album_id":${album-id}}"""
   }
-
 
 
   val createArtist = exec(
@@ -64,7 +63,7 @@ class WorkshopSimulation extends Simulation {
       .check(status.is(201))
       .check(jsonPath("$.id").saveAs("cover-id"))
   )
-  
+
   val getCovers = exec(
     http("Get covers")
       .get("/covers")
@@ -84,6 +83,14 @@ class WorkshopSimulation extends Simulation {
   val deleteCover = exec(
     http("Delete cover")
       .delete("/covers/${cover-id}")
+      .headers(commonHeaders)
+      .check(status.is(200))
+  )
+
+
+  val getByIdCover = exec(
+    http("Get by id cover")
+      .get("/covers/${cover-id}")
       .headers(commonHeaders)
       .check(status.is(200))
   )
@@ -128,8 +135,19 @@ class WorkshopSimulation extends Simulation {
       .exec(deleteCover)
   }
 
+  val singleGetByIdScenario = scenario("Get by id scenario")
+    .feed(data)
+    .forever {
+    feed(data)
+      .pause(1)
+      .exec(createArtist)
+      .exec(createAlbum)
+      .exec(createCover)
+      .exec(getByIdCover)
+  }
 
-  setUp(List(
+
+  setUp(
     singleCreateCoverScenario.inject(
       rampUsers(1) over (2 seconds)
     ),
@@ -141,8 +159,10 @@ class WorkshopSimulation extends Simulation {
     ),
     singleDeleteCoversScenario.inject(
       rampUsers(1) over (2 seconds)
+    ),
+    singleGetByIdScenario.inject(
+      rampUsers(1) over (2 seconds)
     )
-  )
   ).protocols(httpConf)
     .maxDuration(testDurationSec() seconds)
 
