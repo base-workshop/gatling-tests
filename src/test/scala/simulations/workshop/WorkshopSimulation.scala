@@ -9,7 +9,7 @@ import simulations.Common._
 class WorkshopSimulation extends Simulation {
 
   val httpConf = http
-    .proxy(Proxy("127.0.0.1", 8888).httpsPort(8888))
+//    .proxy(Proxy("127.0.0.1", 8888).httpsPort(8888))
     .baseURL("https://workshop.uxguards.com/whipping-boy/api")
     .disableCaching
 
@@ -88,7 +88,7 @@ class WorkshopSimulation extends Simulation {
 
   setUp(
     singleUserScenario.inject(
-      rampUsers(2) over (2 seconds)
+      rampUsers(10) over (2 seconds)
     )
   ).protocols(httpConf)
     .maxDuration(testDurationSec() seconds)
