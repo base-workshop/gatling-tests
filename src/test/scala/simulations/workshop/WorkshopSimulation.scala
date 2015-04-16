@@ -16,6 +16,14 @@ class WorkshopSimulation extends Simulation {
       |"name": "sony"
       |}
     """.stripMargin
+    
+  val putLabel =
+  """
+    |{
+    |"country": "Poland",
+    |"name": "sony2"
+    |}
+  """.stripMargin
 
   val createLabel = exec(
   http("Create label")
@@ -24,12 +32,26 @@ class WorkshopSimulation extends Simulation {
   .body(StringBody(label))
   .asJSON
   .check(status.is(201))
+    .check(jsonPath("$.id")
+        .saveAs("id")
   )
+  )
+  
+  val updateLabel = exec(http("Delete label")
+      .put("/labels/${id}")
+      .body(StringBody(putLabel)).asJSON
+      .check(status.is(201))
+      .check(jsonPath("$.id")
+      .saveAs("id")
+      )
+      )
+  
 
   val singleUserScenario = scenario("Single user")
     .forever {
       pause(1)
       .exec(createLabel)
+      .exec(updateLabel)
   }
 
   setUp(
