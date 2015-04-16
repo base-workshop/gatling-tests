@@ -9,7 +9,7 @@ import simulations.Common._
 class WorkshopSimulation extends Simulation {
 
   val httpConf = http
-//    .proxy(Proxy("127.0.0.1", 8888).httpsPort(8888))
+    .proxy(Proxy("127.0.0.1", 8888).httpsPort(8888))
     .baseURL("https://workshop.uxguards.com/whipping-boy/api")
     .disableCaching
 
@@ -24,26 +24,57 @@ class WorkshopSimulation extends Simulation {
     """{"url":"${url}"}"""
   }
 
+  val getWebsite = exec(
+      http("wolak1")
+      .get("/websites/${websiteId}")
+      .headers(commonHeaders)
+      .check(status.is(201))
+      )
+
+  val createArtist = exec(
+      http("wolak4")
+      .post("/artists")
+      .body(StringBody("""{"name": "Wolakko", "label_id": ${labelId}}"""))
+      .asJSON
+      .headers(commonHeaders)
+      .check(status.is(201))
+      )
+
+  val createLabel = exec(
+      http("wolak3")
+      .post("/labels")
+      .body(StringBody("""{"country": "wolakolandia", "name": "Volaco Solutions"}"""))
+      .asJSON
+      .headers(commonHeaders)
+      .check(jsonPath("$.id")
+      .ofType[Int]
+      .saveAs("labelId"))
+      )
+
   val createWebsite = exec(
     http("Create Website")
       .post("/websites")
       .body(StringBody(website()))
       .asJSON
-      .check(status.is(201))
-  )
+      .check(jsonPath("$.id")
+      .ofType[Int]
+      .saveAs("websiteId")))
 
   val singleUserScenario = scenario("Single user")
     .feed(data)
     .forever {
       feed(data)
       .pause(1)
-      .exec(http("discovery").options("/").headers(commonHeaders))
+      .exec(http("wolak").options("/").headers(commonHeaders))
       .exec(createWebsite)
+      .exec(getWebsite)
+      .exec(createLabel)
+      .exec(createArtist)
   }
 
   setUp(
     singleUserScenario.inject(
-      rampUsers(1) over (2 seconds)
+      rampUsers(100) over (1 seconds)
     )
   ).protocols(httpConf)
     .maxDuration(testDurationSec() seconds)
