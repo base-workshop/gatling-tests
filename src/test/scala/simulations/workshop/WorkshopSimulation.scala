@@ -62,6 +62,7 @@ class WorkshopSimulation extends Simulation {
       .body(StringBody(coverBody()))
       .asJSON
       .check(status.is(201))
+      .check(jsonPath("$.id").saveAs("cover-id"))
   )
   
   val getCovers = exec(
@@ -69,6 +70,15 @@ class WorkshopSimulation extends Simulation {
       .get("/covers")
       .headers(commonHeaders)
       .check(status.is(200))
+  )
+
+  val putCover = exec(
+    http("put cover")
+      .put("/covers/${cover-id}")
+      .headers(commonHeaders)
+      .body(StringBody(coverBody()))
+      .asJSON
+      .check(status.is(201))
   )
 
   val singleCreateCoverScenario = scenario("Create cover scenario")
@@ -81,7 +91,6 @@ class WorkshopSimulation extends Simulation {
       .exec(createCover)
   }
 
-
   val singleGetCoversScenario = scenario("Get covers scenario")
     .feed(data)
     .forever {
@@ -90,11 +99,25 @@ class WorkshopSimulation extends Simulation {
       .exec(getCovers)
   }
 
+  val singlePutCoversScenario = scenario("Put cover scenario")
+    .feed(data)
+    .forever {
+    feed(data)
+      .pause(1)
+      .exec(createArtist)
+      .exec(createAlbum)
+      .exec(createCover)
+      .exec(putCover)
+  }
+
   setUp(List(
     singleCreateCoverScenario.inject(
       rampUsers(1) over (2 seconds)
     ),
     singleGetCoversScenario.inject(
+      rampUsers(1) over (2 seconds)
+    ),
+    singlePutCoversScenario.inject(
       rampUsers(1) over (2 seconds)
     )
   )
