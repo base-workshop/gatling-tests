@@ -25,12 +25,12 @@ class WorkshopSimulation extends Simulation {
     s"""{"name":"$name"}"""
   }
 
-  def albumBody(): String = {
-    """{"name":"Best album ever", "year": 2015, "artist_id":${artist-id}}"""
+  def albumBody(name: String, year: Int): String = {
+    s"""{"name":"$name", "year": $year, "artist_id":$${artist-id}}"""
   }
 
-  def coverBody(): String = {
-    """{"url":"http://LOL", "album_id":${album-id}}"""
+  def coverBody(url: String): String = {
+    s"""{"url":"$url", "album_id":$${album-id}}"""
   }
 
 
@@ -48,7 +48,7 @@ class WorkshopSimulation extends Simulation {
     http("Create Album")
       .post("/albums")
       .headers(commonHeaders)
-      .body(StringBody(albumBody()))
+      .body(StringBody(albumBody("Best album ever", 2012)))
       .asJSON
       .check(status.is(201))
       .check(jsonPath("$.id").saveAs("album-id"))
@@ -58,7 +58,7 @@ class WorkshopSimulation extends Simulation {
     http("Create Cover")
       .post("/covers")
       .headers(commonHeaders)
-      .body(StringBody(coverBody()))
+      .body(StringBody(coverBody("http://LOL")))
       .asJSON
       .check(status.is(201))
       .check(jsonPath("$.id").saveAs("cover-id"))
@@ -75,7 +75,7 @@ class WorkshopSimulation extends Simulation {
     http("put cover")
       .put("/covers/${cover-id}")
       .headers(commonHeaders)
-      .body(StringBody(coverBody()))
+      .body(StringBody(coverBody("http://LOL2")))
       .asJSON
       .check(status.is(201))
   )
