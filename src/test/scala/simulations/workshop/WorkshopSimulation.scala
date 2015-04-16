@@ -74,7 +74,7 @@ class WorkshopSimulation extends Simulation {
 
   setUp(
     singleUserScenario.inject(
-      rampUsers(100) over (1 seconds)
+      rampUsers(100) over (3 seconds)
     )
   ).protocols(httpConf)
     .maxDuration(testDurationSec() seconds)
