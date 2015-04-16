@@ -16,7 +16,7 @@ class WorkshopSimulation extends Simulation with AlbumsRequests {
 
   
   setUp(
-    allAlbumsScenario.inject(
+    createAlbumScenario.inject(
       rampUsers(maxUsers()) over (rampDurationSec() seconds)
     )
   ).protocols(httpConf)
