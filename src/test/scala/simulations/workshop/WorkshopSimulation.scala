@@ -15,18 +15,18 @@ class WorkshopSimulation extends Simulation {
 
   val label =
     s"""
-      |{
-      | "country": "$country",
-      | "name": "$name"
-      |}
+       |{
+       |"country": "$country",
+                              |"name": "$name"
+                                               |}
     """.stripMargin
-    
+
   val putLabel =
     s"""
-      |{
-      | "country": "$country",
-      | "name": "$updatedName"
-      |}
+       |{
+       |"country": "$country",
+                              |"name": "$updatedName"
+                                                      |}
     """.stripMargin
 
   val createLabel = exec(
@@ -51,27 +51,27 @@ class WorkshopSimulation extends Simulation {
       .check(jsonPath("$.name").is(name))
       .check(jsonPath("$.id").is("${id}"))
   )
-  
+
   val updateLabel = exec(http("Update label")
-      .put("/labels/${id}")
-      .body(StringBody(putLabel)).asJSON
-      .check(status.is(201))
-      .check(jsonPath("$.country").is(country))
-      .check(jsonPath("$.name").is(updatedName))
-      .check(jsonPath("$.id").is("${id}")
-      .saveAs("id")
-      )
-      )
-  
+    .put("/labels/${id}")
+    .body(StringBody(putLabel)).asJSON
+    .check(status.is(201))
+    .check(jsonPath("$.country").is(country))
+    .check(jsonPath("$.name").is(updatedName))
+    .check(jsonPath("$.id").is("${id}")
+    .saveAs("id")
+    )
+  )
+
 
   val singleUserScenario = scenario("Single user")
     .forever {
 
-      pause(1)
+    pause(1)
       .exec(createLabel)
       .exec(getLabel)
       .exec(updateLabel)
-      
+
   }
 
 
