@@ -29,6 +29,12 @@ class WorkshopSimulation extends Simulation {
     """{"name":"Best album ever", "year": 2015, "artist_id":${artist-id}}"""
   }
 
+  def coverBody(): String = {
+    """{"url":"http://LOL", "album_id":${album-id}}"""
+  }
+
+
+
   val createArtist = exec(
     http("Create Artist")
       .post("/artists")
@@ -49,20 +55,49 @@ class WorkshopSimulation extends Simulation {
       .check(jsonPath("$.id").saveAs("album-id"))
   )
 
-  val singleCreateCoverScenario = scenario("Create cover scernario")
+  val createCover = exec(
+    http("Create Cover")
+      .post("/covers")
+      .headers(commonHeaders)
+      .body(StringBody(coverBody()))
+      .asJSON
+      .check(status.is(201))
+  )
+  
+  val getCovers = exec(
+    http("Get covers")
+      .get("/covers")
+      .headers(commonHeaders)
+      .check(status.is(200))
+  )
+
+  val singleCreateCoverScenario = scenario("Create cover scenario")
     .feed(data)
     .forever {
     feed(data)
       .pause(1)
-      .exec(http("discovery").options("/").headers(commonHeaders))
       .exec(createArtist)
       .exec(createAlbum)
+      .exec(createCover)
   }
 
-  setUp(
+
+  val singleGetCoversScenario = scenario("Get covers scenario")
+    .feed(data)
+    .forever {
+    feed(data)
+      .pause(1)
+      .exec(getCovers)
+  }
+
+  setUp(List(
     singleCreateCoverScenario.inject(
       rampUsers(1) over (2 seconds)
+    ),
+    singleGetCoversScenario.inject(
+      rampUsers(1) over (2 seconds)
     )
+  )
   ).protocols(httpConf)
     .maxDuration(testDurationSec() seconds)
 
