@@ -37,8 +37,8 @@ class WorkshopSimulation extends Simulation {
       .body(StringBody(label))
       .asJSON
       .check(status.is(201))
-      .check(jsonPath("$.country").is(country))
-      .check(jsonPath("$.name").is(name))
+      .check(jsonPath("$.country").is(country).saveAs("country"))
+      .check(jsonPath("$.name").is(name).saveAs("name"))
       .check(jsonPath("$.id").exists.saveAs("id"))
   )
 
@@ -47,8 +47,8 @@ class WorkshopSimulation extends Simulation {
       .get("/labels/${id}")
       .check(status.is(200))
       .asJSON
-      .check(jsonPath("$.country").is(country))
-      .check(jsonPath("$.name").is(name))
+      .check(jsonPath("$.country").is("${country}"))
+      .check(jsonPath("$.name").is("${name}"))
       .check(jsonPath("$.id").is("${id}"))
   )
 
@@ -56,16 +56,16 @@ class WorkshopSimulation extends Simulation {
     .put("/labels/${id}")
     .body(StringBody(putLabel)).asJSON
     .check(status.is(201))
-    .check(jsonPath("$.country").is(country))
-    .check(jsonPath("$.name").is(updatedName))
-    .check(jsonPath("$.id").is("${id}")
-    .saveAs("id")
+    .check(jsonPath("$.country").is(country).saveAs("country"))
+    .check(jsonPath("$.name").is(updatedName).saveAs("name"))
+    .check(jsonPath("$.id").is("${id}").saveAs("id")
     )
   )
-  
+
   val deleteLabel = exec(http("Delete label")
     .delete("/labels/${id}")
-    .check(status.is(200))
+    .check(status.is(200)))
+    .exec(http("Get not existing")
     .get("/labels/${id}")
     .check(status.is(404))
     )
@@ -78,10 +78,10 @@ class WorkshopSimulation extends Simulation {
       .exec(createLabel)
       .exec(getLabel)
       .exec(updateLabel)
+      .exec(getLabel)
       .exec(deleteLabel)
 
   }
-
 
   setUp(
     singleUserScenario.inject(
