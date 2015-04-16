@@ -6,7 +6,7 @@ import io.gatling.core.scenario.Simulation
 import scala.concurrent.duration._
 import simulations.Common._
 
-class WorkshopSimulation extends Simulation {
+class WorkshopSimulation extends Simulation with AlbumsRequests {
 
   val singleUserScenario = scenario("Single user")
     .forever {
@@ -14,8 +14,9 @@ class WorkshopSimulation extends Simulation {
       .exec(http("discovery").options("/").headers(commonHeaders))
   }
 
+  
   setUp(
-    singleUserScenario.inject(
+    allAlbumsScenario.inject(
       rampUsers(maxUsers()) over (rampDurationSec() seconds)
     )
   ).protocols(httpConf)
