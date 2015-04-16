@@ -25,27 +25,42 @@ class WorkshopSimulation extends Simulation {
     s"""{"name":"$name"}"""
   }
 
-  val createWebsite = exec(
+  def albumBody(): String = {
+    """{"name":"Best album ever", "year": 2015, "artist_id":${artist-id}}"""
+  }
+
+  val createArtist = exec(
     http("Create Artist")
       .post("/artists")
       .headers(commonHeaders)
       .body(StringBody(artistBody("Tonny")))
       .asJSON
       .check(status.is(201))
-
+      .check(jsonPath("$.id").saveAs("artist-id"))
   )
 
-  val singleUserScenario = scenario("Single user")
+  val createAlbum = exec(
+    http("Create Album")
+      .post("/albums")
+      .headers(commonHeaders)
+      .body(StringBody(albumBody()))
+      .asJSON
+      .check(status.is(201))
+      .check(jsonPath("$.id").saveAs("album-id"))
+  )
+
+  val singleCreateCoverScenario = scenario("Create cover scernario")
     .feed(data)
     .forever {
     feed(data)
       .pause(1)
       .exec(http("discovery").options("/").headers(commonHeaders))
-      .exec(createWebsite)
+      .exec(createArtist)
+      .exec(createAlbum)
   }
 
   setUp(
-    singleUserScenario.inject(
+    singleCreateCoverScenario.inject(
       rampUsers(1) over (2 seconds)
     )
   ).protocols(httpConf)
