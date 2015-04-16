@@ -1,0 +1,5 @@
+{
+  "artist_id": ${id},
+  "name": "${name}",
+  "year": 123
+}

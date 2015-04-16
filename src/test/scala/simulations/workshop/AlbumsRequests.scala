@@ -11,7 +11,11 @@ trait AlbumsRequests {
   
   val createAlbum = exec(
     http("addArtist")
-      .post("/artists").body(StringBody("""{ "name": "asd" }""")).asJSON)
+      .post("/artists").body(StringBody("""{ "name": "test-artits2" }"""))
+      .asJSON
+      .check(jsonPath("$.id").saveAs("id"), jsonPath("$.name").saveAs("name")))
+      .exec(http("addAlbum")
+    .post("/albums").body(ELFileBody("album-template.json")).asJSON)
   
   val createAlbumScenario = scenario("create album").exec(createAlbum)
 }
