@@ -62,6 +62,13 @@ class WorkshopSimulation extends Simulation {
     .saveAs("id")
     )
   )
+  
+  val deleteLabel = exec(http("Delete label")
+    .delete("/labels/${id}")
+    .check(status.is(200))
+    .get("/labels/${id}")
+    .check(status.is(404))
+    )
 
 
   val singleUserScenario = scenario("Single user")
@@ -71,6 +78,7 @@ class WorkshopSimulation extends Simulation {
       .exec(createLabel)
       .exec(getLabel)
       .exec(updateLabel)
+      .exec(deleteLabel)
 
   }
 
